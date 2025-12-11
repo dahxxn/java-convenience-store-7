@@ -72,6 +72,30 @@ public class Products {
         return status.toString();
     }
 
+    public boolean isContain(String productName) {
+        return productNameSet.contains(productName);
+    }
+
+    public boolean isCoverageStock(int quantity, String name) {
+        return totalStock(name) >= quantity;
+    }
+
+    private int totalStock(String name) {
+        ProductName promotionProductName = getPromotionProductName(name);
+        ProductName productName = getProductName(name);
+
+        int totalStock = 0;
+
+        if (promotionProductName != null) {
+            totalStock += promotionProducts.get(promotionProductName).stock;
+        }
+        if (productName != null) {
+            totalStock += products.get(productName).stock;
+        }
+
+        return totalStock;
+    }
+
     private String getProductStatus(ProductName productName) {
         ProductInfo productInfo = products.get(productName);
         return PRODUCT_INFO_FORMAT.formatted(productName.getName(), productInfo.price,
@@ -84,6 +108,7 @@ public class Products {
                 productInfo.stock == 0 ? "재고없음" : productInfo.stock + "개",
                 productInfo.promotionName.getName());
     }
+
 
     private ProductName getProductName(String productName) {
         for (ProductName productName1 : products.keySet()) {
