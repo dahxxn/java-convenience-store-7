@@ -16,7 +16,9 @@ public class Promotions {
                 String[] infos = rawPromotionInfo.split(",");
 
                 String name = infos[0].trim();
-                checkPromotionExist(name);
+                if (checkPromotionExist(name)) {
+                    throw new BusinessException(ErrorCode.PROMOTION_DUPLICATE);
+                }
 
                 String buyCnt = infos[1].trim();
                 String getCnt = infos[2].trim();
@@ -33,10 +35,21 @@ public class Promotions {
         }
     }
 
-    private void checkPromotionExist(String name) {
+    public boolean checkPromotionExist(String name) {
         if (promotions.containsKey(new PromotionName(name))) {
-            throw new BusinessException(ErrorCode.PROMOTION_DUPLICATE);
+            return true;
         }
+        return false;
+
+    }
+
+    public PromotionName getPromotionName(String name) {
+        for (PromotionName promotionName : promotions.keySet()) {
+            if (promotionName.name.equals(name)) {
+                return promotionName;
+            }
+        }
+        throw new BusinessException(ErrorCode.PROMOTION_NOT_EXIST);
     }
 
     public void checkPromotions() {

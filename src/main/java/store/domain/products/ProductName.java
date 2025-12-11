@@ -1,9 +1,9 @@
-package store.domain.promotions;
+package store.domain.products;
 
-public class PromotionName {
+public class ProductName {
     String name;
 
-    public PromotionName(String name) {
+    public ProductName(String name) {
         this.name = name;
     }
 

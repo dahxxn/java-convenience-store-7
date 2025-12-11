@@ -14,6 +14,8 @@ public enum ErrorCode {
     DATE_TIME_FORMAT_ERROR("잘못된 날짜 형식입니다."),
     PROMOTION_FORMAT_ERROR("프로모션 정보가 잘못된 형식입니다."),
     PROMOTION_DUPLICATE("프로모션은 중복으로 존재할 수 없습니다."),
+    PRODUCT_FORMAT_ERROR("상품 정보가 잘못된 형식입니다."),
+    PROMOTION_NOT_EXIST("해당 프로모션은 존재하지 않습니다."),
 
     ;
 
