@@ -1,6 +1,7 @@
 package store.domain.products;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import store.domain.promotions.Promotions;
 import store.error.BusinessException;
@@ -8,11 +9,16 @@ import store.error.ErrorCode;
 
 public class Products {
     private HashMap<ProductName, ProductInfo> products;
+    private LinkedHashSet<String> productNameSet;
     private HashMap<ProductName, ProductInfo> promotionProducts;
+
+    private static final String PRODUCT_INFO_FORMAT = "- %s %,d원 %s %s\n";
+
 
     public Products(List<String> rawProductsContents, Promotions promotions) {
         products = new HashMap<>();
         promotionProducts = new HashMap<>();
+        productNameSet = new LinkedHashSet<>();
 
         for (String rawPromotionInfo : rawProductsContents) {
             try {
@@ -28,14 +34,73 @@ public class Products {
 
                 if (promotionName.equals("null")) {
                     products.put(productname, productInfo);
+                    productNameSet.add(name);
                     continue;
                 }
-                promotionProducts.put(productname, productInfo);
 
+                promotionProducts.put(productname, productInfo);
+                if (!productNameSet.contains(name)) {
+                    products.put(productname, new ProductInfo(price, "0", "null", promotions));
+                }
+                productNameSet.add(name);
             } catch (IndexOutOfBoundsException e) {
                 throw new BusinessException(ErrorCode.PRODUCT_FORMAT_ERROR);
             }
         }
+    }
+
+    public String getCurrentProductStatus() {
+        StringBuilder status = new StringBuilder();
+
+        status.append("현재 보유하고 있는 상품입니다.\n\n");
+
+        for (String name : productNameSet) {
+            ProductName promotionProductName = getPromotionProductName(name);
+            if (promotionProductName != null) {
+                status.append(getPromotionProductStatus(promotionProductName));
+            }
+
+            ProductName productName = getProductName(name);
+            if (productName != null) {
+                status.append(getProductStatus(productName));
+                continue;
+            }
+        }
+
+        status.append("\n");
+
+        return status.toString();
+    }
+
+    private String getProductStatus(ProductName productName) {
+        ProductInfo productInfo = products.get(productName);
+        return PRODUCT_INFO_FORMAT.formatted(productName.getName(), productInfo.price,
+                productInfo.stock == 0 ? "재고없음" : productInfo.stock + "개", "");
+    }
+
+    private String getPromotionProductStatus(ProductName productName) {
+        ProductInfo productInfo = promotionProducts.get(productName);
+        return PRODUCT_INFO_FORMAT.formatted(productName.getName(), productInfo.price,
+                productInfo.stock == 0 ? "재고없음" : productInfo.stock + "개",
+                productInfo.promotionName.getName());
+    }
+
+    private ProductName getProductName(String productName) {
+        for (ProductName productName1 : products.keySet()) {
+            if (productName1.getName().equals(productName)) {
+                return productName1;
+            }
+        }
+        return null;
+    }
+
+    private ProductName getPromotionProductName(String productName) {
+        for (ProductName productName1 : promotionProducts.keySet()) {
+            if (productName1.getName().equals(productName)) {
+                return productName1;
+            }
+        }
+        return null;
     }
 
     public void checkProducts() {

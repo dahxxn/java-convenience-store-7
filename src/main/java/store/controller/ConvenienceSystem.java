@@ -28,7 +28,7 @@ public class ConvenienceSystem {
         boolean keepGoing = true;
         while (keepGoing) {
             OutputView.print("안녕하세요. W편의점입니다.");
-
+            OutputView.print(products.getCurrentProductStatus());
             keepGoing = false;
         }
     }

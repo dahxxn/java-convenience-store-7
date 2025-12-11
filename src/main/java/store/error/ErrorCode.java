@@ -17,7 +17,7 @@ public enum ErrorCode {
     PRODUCT_FORMAT_ERROR("상품 정보가 잘못된 형식입니다."),
     PROMOTION_NOT_EXIST("해당 프로모션은 존재하지 않습니다."),
 
-    ;
+    PRODUCT_NOT_FOUND("해당 상품은 존재하지 않습니다.");
 
     private final String message;
     private final String header = "[ERROR] ";
