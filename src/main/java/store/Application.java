@@ -1,7 +1,10 @@
 package store;
 
+import store.controller.ConvenienceSystem;
+
 public class Application {
     public static void main(String[] args) {
-        // TODO: 프로그램 구현
+        ConvenienceSystem system = new ConvenienceSystem();
+        system.run();
     }
 }
