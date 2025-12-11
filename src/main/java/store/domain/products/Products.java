@@ -3,6 +3,7 @@ package store.domain.products;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import store.domain.promotions.PromotionName;
 import store.domain.promotions.Promotions;
 import store.error.BusinessException;
 import store.error.ErrorCode;
@@ -78,6 +79,36 @@ public class Products {
 
     public boolean isCoverageStock(int quantity, String name) {
         return totalStock(name) >= quantity;
+    }
+
+    public boolean isPromotionProduct(String productName, Promotions promotions) {
+        ProductName promotionProductName = getPromotionProductName(productName);
+        if (promotionProductName != null) {
+
+            ProductInfo productInfo = promotionProducts.get(promotionProductName);
+            PromotionName promotionName = productInfo.promotionName;
+
+            if (promotions.isAvailablePromotion(promotionName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public PromotionName getPromotionName(String productName) {
+        ProductName promotionProductName = getPromotionProductName(productName);
+        if (promotionProductName != null) {
+
+            ProductInfo productInfo = promotionProducts.get(promotionProductName);
+            return productInfo.promotionName;
+        }
+        return null;
+    }
+
+    public int checkPromotionStock(String name, int getQuantity) {
+        ProductName promotionProductName = getPromotionProductName(name);
+        ProductInfo productInfo = promotionProducts.get(promotionProductName);
+        return getQuantity - productInfo.stock;
     }
 
     private int totalStock(String name) {
