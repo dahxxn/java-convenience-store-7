@@ -19,6 +19,9 @@ public class Receipt {
     }
 
     public void addPurchase(String productName, int quantity, int price) {
+        if (quantity <= 0) {
+            return;
+        }
         purchaseDetails.put(productName, new PurchaseDetail(quantity, price));
         totalAmount += quantity * price;
     }

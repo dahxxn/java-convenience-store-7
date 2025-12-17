@@ -1,17 +1,23 @@
 package store.domain.promotions;
 
 public class PromotionResult {
+    private final boolean hasPromotion;
     private final int promotionAppliedQuantity;
     private final int freeQuantity;
     private final int regularQuantity;
     private final int additionalQuantity;
-    
-    public PromotionResult(int promotionAppliedQuantity, int freeQuantity,
+
+    public PromotionResult(boolean hasPromotion, int promotionAppliedQuantity, int freeQuantity,
                            int regularQuantity, int additionalQuantity) {
+        this.hasPromotion = hasPromotion;
         this.promotionAppliedQuantity = promotionAppliedQuantity;
         this.freeQuantity = freeQuantity;
         this.regularQuantity = regularQuantity;
         this.additionalQuantity = additionalQuantity;
+    }
+
+    public boolean hasPromotion() {
+        return hasPromotion;
     }
 
     public int getPromotionAppliedQuantity() {
@@ -35,6 +41,7 @@ public class PromotionResult {
     }
 
     public boolean hasRegularPriceItems() {
-        return regularQuantity > 0;
+        return hasPromotion && regularQuantity > 0;
     }
+
 }

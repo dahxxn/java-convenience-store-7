@@ -8,8 +8,13 @@ public class PromotionCalculator {
     public PromotionResult calculate(String productName, int requestQuantity, Inventory inventory) {
         Product promotionProduct = inventory.findProduct(productName, true);
 
-        if (promotionProduct == null || !promotionProduct.getPromotion().isActive()) {
-            return new PromotionResult(0, 0, requestQuantity, 0);
+        if (promotionProduct == null) {
+            return new PromotionResult(false, 0, 0, 0, 0);
+        }
+
+        Promotion promotion = promotionProduct.getPromotion();
+        if (promotion == null || !promotion.isActive()) {
+            return new PromotionResult(false, 0, 0, 0, 0);
         }
 
         return calculateWithPromotion(promotionProduct, requestQuantity, inventory);
@@ -21,6 +26,10 @@ public class PromotionCalculator {
         Promotion promotion = promotionProduct.getPromotion();
         int promotionStock = promotionProduct.getQuantity();
         int promotionUnit = promotion.getPromotionUnit();
+
+        if (promotionStock == 0) {
+            return new PromotionResult(false, 0, 0, 0, 0);
+        }
 
         int maxPromotionSets = promotionStock / promotionUnit;
 
@@ -39,7 +48,7 @@ public class PromotionCalculator {
         int regularQuantity = calculateRegularQuantity(
                 remainingQuantity, additionalQuantity, promotionStock, promotionAppliedQuantity);
 
-        return new PromotionResult(promotionAppliedQuantity, freeQuantity,
+        return new PromotionResult(true, promotionAppliedQuantity, freeQuantity,
                 regularQuantity, additionalQuantity);
     }
 
@@ -55,6 +64,10 @@ public class PromotionCalculator {
     private int calculateRegularQuantity(int remainingQuantity, int additionalQuantity,
                                          int promotionStock, int promotionAppliedQuantity) {
         if (additionalQuantity > 0) {
+            return 0;
+        }
+
+        if (remainingQuantity <= 0) {
             return 0;
         }
 

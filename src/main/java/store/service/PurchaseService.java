@@ -36,20 +36,19 @@ public class PurchaseService {
             PromotionResult result = results.get(i);
             int price = getProductPrice(item.getProductName());
 
-            // 구매 내역 추가
             receipt.addPurchase(item.getProductName(), item.getQuantity(), price);
 
-            // 증정 내역 추가
-            if (result.getFreeQuantity() > 0) {
-                receipt.addGift(item.getProductName(), result.getFreeQuantity());
-                receipt.addPromotionDiscount(result.getFreeQuantity() * price);
+            if (result.hasPromotion()) {
+                if (result.getFreeQuantity() > 0) {
+                    receipt.addGift(item.getProductName(), result.getFreeQuantity());
+                    receipt.addPromotionDiscount(result.getFreeQuantity() * price);
+                }
+                nonPromotionAmount += result.getRegularQuantity() * price;
+            } else {
+                nonPromotionAmount += item.getQuantity() * price;
             }
-
-            // 프로모션 미적용 금액 계산
-            nonPromotionAmount += result.getRegularQuantity() * price;
         }
 
-        // 멤버십 할인 적용
         if (applyMembership) {
             int membershipDiscount = membershipCalculator.calculate(nonPromotionAmount);
             receipt.setMembershipDiscount(membershipDiscount);
