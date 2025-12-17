@@ -21,5 +21,9 @@ public class ShoppingItem {
         this.quantity += amount;
     }
 
-    
+    public void setQuantity(int amount) {
+        this.quantity = amount;
+    }
+
+
 }
