@@ -5,15 +5,18 @@ import store.domain.Inventory.Inventory;
 import store.domain.products.Product;
 import store.domain.promotions.PromotionCalculator;
 import store.domain.promotions.PromotionResult;
+import store.domain.receipt.Receipt;
 import store.domain.shopping.ShoppingItem;
 
 public class PurchaseService {
     private final PromotionCalculator promotionCalculator;
+    private final MembershipCalculator membershipCalculator;
     private final Inventory inventory;
 
     public PurchaseService(Inventory inventory) {
         this.inventory = inventory;
         this.promotionCalculator = new PromotionCalculator();
+        this.membershipCalculator = new MembershipCalculator();
     }
 
     public PromotionResult getPromotionResult(ShoppingItem item) {
@@ -22,6 +25,37 @@ public class PurchaseService {
                 item.getQuantity(),
                 inventory
         );
+    }
+
+    public Receipt createReceipt(List<ShoppingItem> items, List<PromotionResult> results, boolean applyMembership) {
+        Receipt receipt = new Receipt();
+        int nonPromotionAmount = 0;
+
+        for (int i = 0; i < items.size(); i++) {
+            ShoppingItem item = items.get(i);
+            PromotionResult result = results.get(i);
+            int price = getProductPrice(item.getProductName());
+
+            // 구매 내역 추가
+            receipt.addPurchase(item.getProductName(), item.getQuantity(), price);
+
+            // 증정 내역 추가
+            if (result.getFreeQuantity() > 0) {
+                receipt.addGift(item.getProductName(), result.getFreeQuantity());
+                receipt.addPromotionDiscount(result.getFreeQuantity() * price);
+            }
+
+            // 프로모션 미적용 금액 계산
+            nonPromotionAmount += result.getRegularQuantity() * price;
+        }
+
+        // 멤버십 할인 적용
+        if (applyMembership) {
+            int membershipDiscount = membershipCalculator.calculate(nonPromotionAmount);
+            receipt.setMembershipDiscount(membershipDiscount);
+        }
+
+        return receipt;
     }
 
     public void processPayment(List<ShoppingItem> items) {

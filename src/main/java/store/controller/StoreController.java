@@ -1,8 +1,10 @@
 package store.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import store.domain.Inventory.Inventory;
 import store.domain.promotions.PromotionResult;
+import store.domain.receipt.Receipt;
 import store.domain.shopping.ShoppingItem;
 import store.service.PurchaseService;
 import store.view.InputValidator;
@@ -38,23 +40,27 @@ public class StoreController {
 
     private void processPurchase() {
         List<ShoppingItem> shoppingItems = getPurchaseInput();
+        List<PromotionResult> promotionResults = new ArrayList<>();
 
         for (ShoppingItem item : shoppingItems) {
-            processPromotionForItem(item);
+            PromotionResult result = processPromotionForItem(item);
+            promotionResults.add(result);
         }
 
+        boolean applyMembership = askMembership();
+        Receipt receipt = purchaseService.createReceipt(shoppingItems, promotionResults, applyMembership);
+        outputView.printReceipt(receipt);
         purchaseService.processPayment(shoppingItems);
-
-        //System.out.println("\n[임시] 구매 처리 완료");
     }
 
-    private void processPromotionForItem(ShoppingItem item) {
+    private PromotionResult processPromotionForItem(ShoppingItem item) {
         PromotionResult result = purchaseService.getPromotionResult(item);
 
         if (result.hasAdditionalPromotion()) {
             boolean addMore = askAddPromotionItem(item.getProductName());
             if (addMore) {
                 item.increaseQuantity(result.getAdditionalQuantity());
+                return purchaseService.getPromotionResult(item);
             }
         }
 
@@ -62,6 +68,20 @@ public class StoreController {
             boolean buyRegular = askBuyAtRegularPrice(item.getProductName(), result.getRegularQuantity());
             if (!buyRegular) {
                 item.setQuantity(item.getQuantity() - result.getRegularQuantity());
+                return purchaseService.getPromotionResult(item);
+            }
+        }
+
+        return result;
+    }
+
+    private boolean askMembership() {
+        while (true) {
+            try {
+                String input = inputView.readMembershipInput();
+                return inputValidator.validateYesOrNo(input);
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
             }
         }
     }

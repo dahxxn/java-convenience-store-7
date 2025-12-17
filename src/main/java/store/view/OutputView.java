@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import store.domain.Inventory.Inventory;
 import store.domain.products.Product;
+import store.domain.receipt.Receipt;
 
 public class OutputView {
 
@@ -37,6 +38,51 @@ public class OutputView {
             printProductGroup(entry.getValue());
         }
         println();
+    }
+
+    public void printReceipt(Receipt receipt) {
+        System.out.println("\n==============W 편의점================");
+        printPurchaseDetails(receipt);
+        printGiftDetails(receipt);
+        printAmountDetails(receipt);
+    }
+
+    private void printPurchaseDetails(Receipt receipt) {
+        System.out.println("상품명\t\t수량\t금액");
+
+        for (Map.Entry<String, Receipt.PurchaseDetail> entry : receipt.getPurchaseDetails().entrySet()) {
+            String productName = entry.getKey();
+            Receipt.PurchaseDetail detail = entry.getValue();
+
+            System.out.printf("%s\t\t%d\t%s%n",
+                    productName,
+                    detail.getQuantity(),
+                    formatNumber(detail.getTotalPrice()));
+        }
+    }
+
+    private void printGiftDetails(Receipt receipt) {
+        if (receipt.getGiftDetails().isEmpty()) {
+            return;
+        }
+
+        System.out.println("=============증정===============");
+        for (Map.Entry<String, Integer> entry : receipt.getGiftDetails().entrySet()) {
+            System.out.printf("%s\t\t%d%n", entry.getKey(), entry.getValue());
+        }
+    }
+
+    private void printAmountDetails(Receipt receipt) {
+        System.out.println("====================================");
+        System.out.printf("총구매액\t\t%d\t%s%n",
+                receipt.getTotalQuantity(),
+                formatNumber(receipt.getTotalAmount()));
+        System.out.printf("행사할인\t\t\t-%s%n",
+                formatNumber(receipt.getPromotionDiscount()));
+        System.out.printf("멤버십할인\t\t\t-%s%n",
+                formatNumber(receipt.getMembershipDiscount()));
+        System.out.printf("내실돈\t\t\t %s%n",
+                formatNumber(receipt.getFinalAmount()));
     }
 
     private void printProductGroup(List<Product> products) {
