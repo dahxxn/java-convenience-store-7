@@ -20,4 +20,6 @@ public class ShoppingItem {
     public void increaseQuantity(int amount) {
         this.quantity += amount;
     }
+
+    
 }
